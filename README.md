@@ -30,13 +30,13 @@ Run the Binary
 Start Services on docker-compose, This might take 20-30min for \
 the first time until you pull all the required dependencies.
 ```shell
-docker-compose up
+docker-compose up --build
 ```
 
 Create Company
 ```shell
 curl --location --request PUT 'http://localhost:9090/company' \
---header 'X-FORWARDED-FOR: 31.153.207.255,8.8.8.8' \
+--header 'X-FORWARDED-FOR: 31.153.207.255' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "name":"ABC2",
@@ -50,6 +50,7 @@ curl --location --request PUT 'http://localhost:9090/company' \
 Update Company
 ```shell
 curl --location --request POST 'http://localhost:9090/company' \
+--header 'X-FORWARDED-FOR: 31.153.207.255' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "name":"ABC2",
