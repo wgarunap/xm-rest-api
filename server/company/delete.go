@@ -19,8 +19,8 @@ type Failed struct {
 
 type Delete struct {
 	//Validator domain.Validator
-	Producer  domain.Producer
-	DB        repository.Company
+	Producer domain.Producer
+	DB       repository.Company
 }
 
 func (c Delete) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -35,8 +35,7 @@ func (c Delete) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	res := DeleteResponse{}
 
-
-	err := c.DB.Delete(filters...)
+	companies, err := c.DB.Get(filters...)
 	if err != nil {
 		response.ErrEncoder(w, response.Error{
 			Code:         http.StatusInternalServerError,
@@ -46,17 +45,28 @@ func (c Delete) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	//
-	//err := c.Producer.Produce(domain.TopicCompany, []byte(code), nil)
-	//if err != nil {
-	//	res.FailedCode = append(res.FailedCode, Failed{
-	//		Code: code,
-	//		Err:  err,
-	//	})
-	//	continue
-	//}
-	//
-	//res.DeletedCode = append(res.DeletedCode, code)
+
+	err = c.DB.Delete(filters...)
+	if err != nil {
+		response.ErrEncoder(w, response.Error{
+			Code:         http.StatusInternalServerError,
+			Mgs:          "error deleting database entry",
+			AppErrorCode: 4003,
+			Error:        err,
+		})
+		return
+	}
+
+	for _, company := range companies {
+		err := c.Producer.Produce(domain.TopicCompany, []byte(company.Code), nil)
+		if err != nil {
+			res.FailedCode = append(res.FailedCode, Failed{
+				Code: company.Code,
+				Err:  err,
+			})
+			continue
+		}
+	}
 
 	response.Encoder(w, response.Response{
 		Body:   res,
