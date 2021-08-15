@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"github.com/wgarunap/xm-rest-api/domain"
 	"github.com/wgarunap/xm-rest-api/server/response"
 	"net/http"
@@ -21,7 +22,7 @@ func (m IpCheck) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Code:         http.StatusInternalServerError,
 			Mgs:          "adaptor error, unable to retrieve clients origin country",
 			AppErrorCode: 4001,
-			//Error:        err,
+			Error:        err,
 		})
 		return
 	}
@@ -31,7 +32,7 @@ func (m IpCheck) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Code:         http.StatusForbidden,
 			Mgs:          "invalid request origin country",
 			AppErrorCode: 4002,
-			//Error:        err,
+			Error:        fmt.Errorf(`error invalid country of request origin, origin: %v`, country),
 		})
 		return
 	}

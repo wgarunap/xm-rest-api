@@ -30,8 +30,22 @@ Run the Binary
 Start Services on docker-compose, This might take 20-30min for \
 the first time until you pull all the required dependencies.
 ```shell
-docker-compose up --build
+docker-compose up -d --build
 ```
+
+Start the testing without building xm-rest-api image
+```shell
+ docker-compose up -d
+ ```
+> NOTE: if you receive following error, remove the orphan container\
+`ERROR: for api  Container "3e997fbed7c1" is unhealthy.`
+`ERROR: Encountered errors while bringing up the project.`
+
+Stop testing environment
+```shell
+ docker-compose down 
+ ```
+> NOTE: If you do not stop testing env properly, you'll get errors on the next start
 
 Create Company
 ```shell
@@ -71,6 +85,13 @@ Get Company(s)
 ```shell
 curl --location --request GET 'http://localhost:9090/company?code=123123&name=ABC2'
 ```
+
+## Assumptions
+1. Company code is unique for a company
+1. Only one mobile phone is available for a company
+1. Phone number is a number,
+1. Website is a optional field
+1. 
 
 ## Improvements
 1. Add support to Multiple Filters on the same type 

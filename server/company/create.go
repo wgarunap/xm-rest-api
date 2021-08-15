@@ -53,6 +53,32 @@ func (c Create) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = c.DB.Create(domain.Company{
+		Name:    req.Name,
+		Code:    req.Code,
+		Country: req.Country,
+		Website: req.Website,
+		Phone:   req.Phone,
+	})
+	if err != nil {
+		if errors.Is(err, mysql.ErrDuplicateEntry) {
+			response.ErrEncoder(w, response.Error{
+				Code:         http.StatusConflict,
+				Mgs:          "duplicate company code entry",
+				AppErrorCode: 4004,
+				Error:        err,
+			})
+			return
+		}
+		response.ErrEncoder(w, response.Error{
+			Code:         http.StatusInternalServerError,
+			Mgs:          "error creating database entry",
+			AppErrorCode: 4005,
+			Error:        err,
+		})
+		return
+	}
+
 	data, err := json.Marshal(req)
 	if err != nil {
 		response.ErrEncoder(w, response.Error{
@@ -68,34 +94,8 @@ func (c Create) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		response.ErrEncoder(w, response.Error{
 			Code:         http.StatusInternalServerError,
-			Mgs:          "request body data validation error",
-			AppErrorCode: 4004,
-			Error:        err,
-		})
-		return
-	}
-
-	err = c.DB.Create(domain.Company{
-		Name:    req.Name,
-		Code:    req.Code,
-		Country: req.Country,
-		Website: req.Website,
-		Phone:   req.Phone,
-	})
-	if err != nil {
-		if errors.Is(err, mysql.ErrDuplicateEntry){
-			response.ErrEncoder(w, response.Error{
-				Code:         http.StatusConflict,
-				Mgs:          "duplicate company code entry",
-				AppErrorCode: 4003,
-				Error:        err,
-			})
-			return
-		}
-		response.ErrEncoder(w, response.Error{
-			Code:         http.StatusInternalServerError,
-			Mgs:          "error creating database entry",
-			AppErrorCode: 4004,
+			Mgs:          "error producing kafka data",
+			AppErrorCode: 4003,
 			Error:        err,
 		})
 		return
